@@ -1,4 +1,4 @@
-package com.example.CSPool.controller;
+package com.example.backend.controller;
 
 import lombok.Data;
 

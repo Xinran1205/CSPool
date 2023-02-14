@@ -1,11 +1,11 @@
-package com.example.CSPool.domain;
+package com.example.backend.domain;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Builder
 @Data
-public class video {
+public class Video {
     private Integer id;
     private String Name;
     private String Link;
