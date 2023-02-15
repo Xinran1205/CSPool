@@ -16,7 +16,7 @@ class BackendApplicationTests {
 
     @Test
     public void testGetByName(){
-        Video video = videoService.getByName("吴恩达斯坦福机器学习");
+        Video video = videoService.getByName("123");
         System.out.println(video);
     }
 }

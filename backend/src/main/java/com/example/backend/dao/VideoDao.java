@@ -6,6 +6,6 @@ import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface VideoDao {
-    @Select("select * from cspool.video where Name = #{name}")
+    @Select("select * from cspool.video where Name Like \"%\"#{name}\"%\"")
     public Video getByName(String name);
 }
