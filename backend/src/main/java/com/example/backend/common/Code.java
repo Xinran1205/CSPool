@@ -1,5 +1,11 @@
-package com.example.backend.controller;
+package com.example.backend.common;
 
+/**
+ * @author Xinran
+ * @version 1.0
+ * @description TODO
+ * @date 2023/2/26 16:44
+ */
 public class Code {
     public static final Integer SAVE_OK = 20011;
     public static final Integer DELETE_OK = 20021;
