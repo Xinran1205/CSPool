@@ -1,8 +1,8 @@
 .DS_Store
 node_modules
 /dist
-/Backend/.idea
-/Backend/target
+/Backend/.idea/
+/Backend/target/
 
 
 # local env files
