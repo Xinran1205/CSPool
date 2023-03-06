@@ -20,7 +20,7 @@ public class Video implements Serializable {
 
     private Long id;
 
-    private String Name;
+    private String name;
     //视频分类id
     private Long categoryId;
     //图片
@@ -28,9 +28,11 @@ public class Video implements Serializable {
     //顺序
     private Integer sort;
 
-    private String Link;
+    private String link;
 
-    private String Comment;
+    private String comment;
+
+    private Integer level;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

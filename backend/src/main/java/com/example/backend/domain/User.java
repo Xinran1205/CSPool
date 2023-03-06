@@ -19,7 +19,7 @@ public class User implements Serializable {
 
 
     //账号名
-    private String userName;
+    private String username;
 
 
     //手机号，我们项目先用手机号登录，后面有空改为github或者其他方式登录

@@ -19,9 +19,9 @@ public class Favorites implements Serializable {
 
     private Long id;
 
-    private Long user_id;
+    private Long userId;
 
-    private Long video_id;
+    private Long videoId;
 
     //创建时间
     @TableField(fill = FieldFill.INSERT)

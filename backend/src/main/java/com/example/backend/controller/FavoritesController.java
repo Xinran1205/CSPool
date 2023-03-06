@@ -66,16 +66,16 @@ public class FavoritesController {
         }
         //先判定，如果用户收藏的视频已经被用户收藏那么不能收藏
         LambdaQueryWrapper<Favorites> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Favorites::getUser_id,BaseContext.getCurrentId());
-        queryWrapper.eq(Favorites::getVideo_id,video.getId());
+        queryWrapper.eq(Favorites::getUserId,BaseContext.getCurrentId());
+        queryWrapper.eq(Favorites::getVideoId,video.getId());
         if(favoritesService.getOne(queryWrapper)!=null){
             return RestResult.error("视频已收藏",0);
         }
 
         //我不是很确定这里id是不是为空的时候，下面save方法是自动雪花算法生成id的
         Favorites favorites = new Favorites();
-        favorites.setUser_id(BaseContext.getCurrentId());
-        favorites.setVideo_id(video.getId());
+        favorites.setUserId(BaseContext.getCurrentId());
+        favorites.setVideoId(video.getId());
         favoritesService.save(favorites);
 
         return RestResult.success("视频成功添加到收藏夹","成功");
@@ -103,7 +103,7 @@ public class FavoritesController {
             return RestResult.error("请先登录再查看收藏",0);
         }
         LambdaQueryWrapper<Favorites> queryWrapperForFav = new LambdaQueryWrapper<>();
-        queryWrapperForFav.eq(Favorites::getUser_id,BaseContext.getCurrentId());
+        queryWrapperForFav.eq(Favorites::getUserId,BaseContext.getCurrentId());
 
         //从收藏表查出这个用户的所有数据
         List<Favorites> favoritesList = favoritesService.list(queryWrapperForFav);
@@ -116,7 +116,7 @@ public class FavoritesController {
 //        }
         List<Long> b = new ArrayList<>();
         for (int i=0;i<favoritesList.size();i++){
-            b.add(favoritesList.get(i).getVideo_id());
+            b.add(favoritesList.get(i).getVideoId());
         }
 
         //构造分页构造器对象
@@ -183,8 +183,8 @@ public class FavoritesController {
         log.info(video.toString());
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         LambdaQueryWrapper<Favorites> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Favorites::getUser_id,request.getSession().getAttribute("user"));
-        queryWrapper.eq(Favorites::getVideo_id,video.getId());
+        queryWrapper.eq(Favorites::getUserId,request.getSession().getAttribute("user"));
+        queryWrapper.eq(Favorites::getVideoId,video.getId());
         favoritesService.remove(queryWrapper);
 
         return RestResult.success("删除视频成功","成功");
