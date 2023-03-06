@@ -2,6 +2,7 @@
 node_modules
 /dist
 /Backend/.idea
+/Backend/target
 
 
 # local env files
