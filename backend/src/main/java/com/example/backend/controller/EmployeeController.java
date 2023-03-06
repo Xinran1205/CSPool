@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.backend.common.BaseContext;
 import com.example.backend.common.RestResult;
 import com.example.backend.domain.Employee;
 import com.example.backend.service.EmployeeService;
@@ -12,7 +13,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 
 /**
  * @author Xinran
@@ -88,7 +88,7 @@ public class EmployeeController {
     }
     
     /**
-    * @description TODO
+    * @description 新增员工
     * @param request 
      * @param employee 
     * @return 
@@ -98,6 +98,12 @@ public class EmployeeController {
     //不需要相对路径，就在/employee里
     @PostMapping
     public RestResult<String> save(HttpServletRequest request,@RequestBody Employee employee){
+
+        //获得当前已登录用户的id，前面我们登录成功返回了登陆人的session
+        //创建这个用户的人（我）
+        if(BaseContext.getCurrentId().toString()!="我的id"){
+            return RestResult.error("不是管理员不能添加员工，谢谢",0);
+        }
         log.info("新增员工，员工信息：{}",employee.toString());
 
         //这里手动设的值（时间，创建人）都是前端他设置不了的，所以我们手动设置，本身employee传过来的时候就带了很多值了
@@ -105,15 +111,12 @@ public class EmployeeController {
         //设置初始密码123456，需要进行md5加密处理,后期员工可以用这个密码登录进来修改自己的密码
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
 
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
+        //这些注释掉的是我们需要多次使用，所以抽出来写个自动填充，在元数据对象处理器配置相应的值
+//        employee.setCreateTime(LocalDateTime.now());
+//        employee.setUpdateTime(LocalDateTime.now());
 
-        //获得当前已登录用户的id，前面我们登录成功返回了登陆人的session
-        //创建这个用户的人（我）
-        Long empId = (Long) request.getSession().getAttribute("employee");
-
-        employee.setCreateUser(empId);
-        employee.setUpdateUser(empId);
+//        employee.setCreateUser(empId);
+//        employee.setUpdateUser(empId);
 
         employeeService.save(employee);
 
@@ -157,11 +160,16 @@ public class EmployeeController {
      */
     @PutMapping
     public RestResult<String> update(HttpServletRequest request,@RequestBody Employee employee){
+        //employee前端传过来的更新过的，比如禁用按钮，status变成0，那么我们肯定数据库中status也要变，所以前端把这个status变为0
+        //的employee对象发给这个函数进行数据库更新，同时这个函数不仅是更新status，其他的都一样，一个道理，前端改了什么，employee也随之改变。
         log.info(employee.toString());
 
-        Long empId = (Long)request.getSession().getAttribute("employee");
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(empId);
+        //注释原因同理上面，自动填充
+        //empId是更新人（当前用户），所以要从session中获取
+//        Long empId = (Long)request.getSession().getAttribute("employee");
+//        employee.setUpdateTime(LocalDateTime.now());
+//        employee.setUpdateUser(empId);
+        //注意，前端发的id可能会存在错误，因为JS精度问题导致后3位不一样，所以我们给前端的数据long类型都转成string类型再给前端
         employeeService.updateById(employee);
 
         return RestResult.success("员工信息修改成功","成功");

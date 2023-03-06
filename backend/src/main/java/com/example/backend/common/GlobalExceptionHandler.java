@@ -21,12 +21,14 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @ResponseBody
 @Slf4j
 public class GlobalExceptionHandler {
+    //根据方法上面的注解知道什么异常进什么方法
 
     //处理sql异常
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public RestResult<String> exceptionHandler(SQLIntegrityConstraintViolationException ex){
         log.error(ex.getMessage());
 
+        //添加了重复的数据
         if(ex.getMessage().contains("Duplicate entry")){
             //这里我们根据msg数据的空格分开数据装成数组，拿第三个数据就是用户名
             String[] split = ex.getMessage().split(" ");
@@ -35,5 +37,17 @@ public class GlobalExceptionHandler {
         }
 
         return RestResult.error("未知错误",0);
+    }
+
+    /**
+     * 异常处理方法
+     * @return
+     */
+
+    @ExceptionHandler(CustomException.class)
+    public RestResult<String> exceptionHandler(CustomException ex){
+        log.error(ex.getMessage());
+
+        return RestResult.error(ex.getMessage(),0);
     }
 }
