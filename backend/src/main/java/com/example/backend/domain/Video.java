@@ -34,6 +34,9 @@ public class Video implements Serializable {
 
     private Integer level;
 
+    //新加字段 0审核失败，2审核中，1审核成功，0和-1状态的视频前台是看不了的
+    private Integer status;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 

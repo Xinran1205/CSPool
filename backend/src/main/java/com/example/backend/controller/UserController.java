@@ -1,21 +1,28 @@
 package com.example.backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.backend.common.BaseContext;
 import com.example.backend.common.RestResult;
 import com.example.backend.domain.User;
+import com.example.backend.domain.Video;
+import com.example.backend.domain.VideoCategory;
+import com.example.backend.dto.VideoDto;
 import com.example.backend.service.UserService;
+import com.example.backend.service.VideoCategoryService;
+import com.example.backend.service.VideoService;
 import com.example.backend.utils.SMSUtils;
 import com.example.backend.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Xinran
@@ -29,7 +36,13 @@ import java.util.Map;
 public class UserController {
 
     @Autowired
+    private VideoService videoService;
+
+    @Autowired
     private UserService userService;
+
+    @Autowired
+    private VideoCategoryService videoCategoryService;
 
     /**
      * 发送手机短信验证码
@@ -103,4 +116,63 @@ public class UserController {
         return RestResult.error("登录失败",0);
     }
 
+    /**
+    * @description 用户上传的视频状态分页查询（我的上传）
+    * @param page
+     * @param pageSize
+    * @return
+    * @author
+    * @date
+    */
+    @GetMapping("/page")
+    //前端注意这里查出来的数据重点把status可视化一下1代表审核成功，0代表审核失败，2代表审核中
+    public RestResult<Page> UploadList(int page, int pageSize) {
+
+        //构造分页构造器对象
+        Page<Video> pageInfo = new Page<>(page, pageSize);
+        Page<VideoDto> videoDtoPage = new Page<>();
+
+        //条件构造器
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        //添加过滤条件
+
+        //这里我们就是根据视频上传者查询这个用户上传的视频
+        //只有这一句话和其他分页不一样
+        queryWrapper.eq(Video::getCreateUser, BaseContext.getCurrentId());
+        //添加排序条件
+        queryWrapper.orderByDesc(Video::getUpdateTime);
+
+        //执行分页查询
+        videoService.page(pageInfo, queryWrapper);
+
+        //对象拷贝
+        //把pageInfo中的值拷到DtoPage，除了records这个属性其他都拷贝
+        //因为records我们下面要重新组装
+        //records就是页面每条数据总的List集合
+        BeanUtils.copyProperties(pageInfo, videoDtoPage, "records");
+
+        List<Video> records = pageInfo.getRecords();
+
+        //这里就是遍历这个新的集合，重新组装这个集合
+        List<VideoDto> list = records.stream().map((item) -> {
+            VideoDto videoDto = new VideoDto();
+
+            //这里是把本来原有的属性值从item拷到Dto，就是除了categoryName的属性的值
+            BeanUtils.copyProperties(item, videoDto);
+
+            Long categoryId2 = item.getCategoryId();//分类id
+            //根据id查询分类对象
+            VideoCategory category = videoCategoryService.getById(categoryId2);
+
+            if (category != null) {
+                String categoryName = category.getName();
+                videoDto.setCategoryName(categoryName);
+            }
+            return videoDto;
+        }).collect(Collectors.toList());
+
+        videoDtoPage.setRecords(list);
+
+        return RestResult.success(videoDtoPage,"成功");
+    }
 }

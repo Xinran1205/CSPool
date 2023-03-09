@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/dish")
+@RequestMapping("/video")
 @Slf4j
 //我们就分页用到了dto，用来扩展分类的名字
 public class VideoController {
@@ -49,11 +49,28 @@ public class VideoController {
 
         videoService.save(video);
 
-        return RestResult.success("新增菜品成功","成功");
+        return RestResult.success("新增视频成功","成功");
     }
 
     /**
-     * 后台、前台视频信息分页查询
+    * @description 用户上传视频
+    * @param video
+    * @return
+    * @author
+    * @date
+    */
+    @PostMapping("/userUpload")
+    public RestResult<String> Upload(@RequestBody Video video) {
+        log.info(video.toString());
+        //用户上传的视频status一定得是2，2代表审核中
+        video.setStatus(2);
+        videoService.save(video);
+
+        return RestResult.success("上传视频成功，等待审核","成功");
+    }
+
+    /**
+     * 后台视频信息分页查询
      *
      * @param page
      * @param pageSize
@@ -61,7 +78,6 @@ public class VideoController {
      * @return
      */
     //这里有个重要的，我们后台视频管理分页展示出来是需要带视频分类的
-    //前台展示给用户应该也可以用这个，好像不能用，重写一个分页
     @GetMapping("/page")
     public RestResult<Page> page(int page, int pageSize, String name, Long categoryId) {
 
@@ -114,6 +130,65 @@ public class VideoController {
         return RestResult.success(videoDtoPage,"成功");
     }
 
+    /***
+    * @description 前台视频信息分页查询
+    * @param page
+     * @param pageSize
+     * @param name
+     * @param categoryId
+    * @return
+    * @author
+    * @date
+    */
+    @GetMapping("/frontpage")
+    //对于展示给用户的视频页面，我们只展示status为1的也就是审核通过的视频
+    public RestResult<Page> UserPage(int page, int pageSize, String name, Long categoryId) {
+
+        Page<Video> pageInfo = new Page<>(page, pageSize);
+        Page<VideoDto> videoDtoPage = new Page<>();
+
+        LambdaQueryWrapper<Video> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(name != null, Video::getName, name);
+        queryWrapper.eq(categoryId!=null,Video::getCategoryId,categoryId);
+
+        //这里非常重要，对于用户我们只展示status为1的视频，除了多了这一句其余和上面完全一样
+        queryWrapper.eq(Video::getStatus,1);
+
+        queryWrapper.orderByDesc(Video::getUpdateTime);
+
+        videoService.page(pageInfo, queryWrapper);
+
+        //对象拷贝
+        //把pageInfo中的值拷到DtoPage，除了records这个属性其他都拷贝
+        //因为records我们下面要重新组装
+        //records就是页面每条数据总的List集合
+        BeanUtils.copyProperties(pageInfo, videoDtoPage, "records");
+
+        List<Video> records = pageInfo.getRecords();
+
+        //这里就是遍历这个新的集合，重新组装这个集合
+        List<VideoDto> list = records.stream().map((item) -> {
+            VideoDto videoDto = new VideoDto();
+
+            //这里是把本来原有的属性值从item拷到Dto，就是除了categoryName的属性的值
+            BeanUtils.copyProperties(item, videoDto);
+
+            Long categoryId2 = item.getCategoryId();//分类id
+            //根据id查询分类对象
+            VideoCategory category = videoCategoryService.getById(categoryId2);
+
+            if (category != null) {
+                String categoryName = category.getName();
+                videoDto.setCategoryName(categoryName);
+            }
+            return videoDto;
+        }).collect(Collectors.toList());
+
+        videoDtoPage.setRecords(list);
+
+        return RestResult.success(videoDtoPage,"成功");
+    }
+
     /**
      * 管理员修改视频时根据id查询视频信息
      *
@@ -132,7 +207,7 @@ public class VideoController {
     }
 
     /**
-     * 管理员修改视频
+     * 管理员修改视频，同时审核视频，审核视频就是将status改为1
      *
      * @param video
      * @return
@@ -143,7 +218,7 @@ public class VideoController {
 
         videoService.updateById(video);
 
-        return RestResult.success("新增视频成功","成功");
+        return RestResult.success("修改视频成功","成功");
     }
 
     /**
