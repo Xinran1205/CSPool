@@ -4,9 +4,9 @@ This project is a forum that allows everyone to share computer science resources
 
 ## Features
 
-- （填写项目功能点1）
-- （填写项目功能点2）
-- （填写项目功能点3）
+-  Everyone can share their courses, but they will be audited by the admin.
+-  Everyone can add the courses into their favourite.
+-  Every course will be classified in great detail and contain a thorough introduction.
 
 ## Technology Stack
 ### Backend
