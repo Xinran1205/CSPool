@@ -46,6 +46,16 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.83</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>ai.openai</groupId>-->
+<!--            <artifactId>openai-java-sdk</artifactId>-->
+<!--            <version>1.0.1</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>cn.gjsm</groupId>
+            <artifactId>openai</artifactId>
+            <version>0.1.3</version>
+        </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
