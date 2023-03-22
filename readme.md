@@ -7,6 +7,7 @@ This project is a forum that allows everyone to share computer science resources
 -  Everyone can share their courses, but they will be audited by the admin.
 -  Everyone can add the courses into their favourite.
 -  Every course will be classified in great detail and contain a thorough introduction.
+-  ChatGPT3.0
 
 ## Technology Stack
 ### Backend
